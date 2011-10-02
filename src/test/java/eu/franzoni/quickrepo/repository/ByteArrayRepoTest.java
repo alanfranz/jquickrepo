@@ -12,15 +12,15 @@ import java.io.FileOutputStream;
 import java.util.Arrays;
 
 
-public class FilesystemRepoTest {
+public class ByteArrayRepoTest {
 
     private File myTempDir;
-    private FilesystemRepo repo;
+    private ByteArrayRepo repo;
 
     @Before
     public void setUp() throws Exception {
         myTempDir = Files.createTempDir();
-        repo = new FilesystemRepo(myTempDir);
+        repo = new ByteArrayRepo(myTempDir);
 
     }
 

@@ -10,11 +10,11 @@ import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 
 
-public class FilesystemRepo {
+public class ByteArrayRepo {
     final private File persistenceDir;
     final private MultipleResourceLock lockProvider = new MultipleResourceLock();
 
-    public FilesystemRepo(File persistenceDir) {
+    public ByteArrayRepo(File persistenceDir) {
         validatePersistenceDir(persistenceDir);
         this.persistenceDir = persistenceDir;
     }
