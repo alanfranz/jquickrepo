@@ -2,10 +2,8 @@ package eu.franzoni.quickrepo.repository;
 
 
 import com.google.common.io.Files;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,19 +12,17 @@ import java.util.Arrays;
 
 public class ByteArrayRepoTest {
 
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
+    
     private File myTempDir;
     private ByteArrayRepo repo;
 
     @Before
     public void setUp() throws Exception {
-        myTempDir = Files.createTempDir();
+        myTempDir = tempFolder.newFolder("temp");
         repo = new ByteArrayRepo(myTempDir);
 
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        Files.deleteRecursively(this.myTempDir);
     }
 
     @Test
@@ -144,6 +140,22 @@ public class ByteArrayRepoTest {
         Assert.assertTrue(Arrays.equals(this.repo.load("some"), new byte[]{0xc, 0xf}));
         this.repo.saveOrUpdate("some", new byte[]{0xa, 0xa});
         Assert.assertTrue(Arrays.equals(this.repo.load("some"), new byte[]{0xa, 0xa}));
+
+    }
+
+    @Test
+    public void testModifyWhileLocking() throws Exception {
+        this.repo.saveOrUpdate("some", new byte[]{0xc, 0xf});
+
+        this.repo.modifyWhileLocking("some", new DoWhileLocking<byte[]>() {
+            @Override
+            public byte[] execute(byte[] data) {
+                return new byte[]{0xa, 0xb};
+            }
+        });
+        
+        Assert.assertTrue(Arrays.equals(new byte[]{0xa, 0xb}, this.repo.load("some")));
+
 
     }
 

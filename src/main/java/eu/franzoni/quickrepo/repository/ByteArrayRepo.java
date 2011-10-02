@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
 
 
@@ -164,6 +165,22 @@ public class ByteArrayRepo {
         } finally {
             writeLock.unlock();
         }
+
+    }
+
+    public void modifyWhileLocking(String id, DoWhileLocking<byte[]> doWhile) {
+        validateId(id);
+        Lock writeLock = lockProvider.provideLock(id).writeLock();
+        writeLock.lock();
+        try {
+            byte[] newData = doWhile.execute(Files.toByteArray(new File(persistenceDir, id)));
+            persistData(id, newData);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            writeLock.unlock();
+        }
+
 
     }
 }
