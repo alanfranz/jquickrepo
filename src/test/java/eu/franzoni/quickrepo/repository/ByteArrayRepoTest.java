@@ -38,6 +38,19 @@ public class ByteArrayRepoTest {
 
     }
 
+    @Test(expected = UnknownResourceIdException.class)
+    public void testDeleteRemovesFileWithId() {
+        byte[] data = new byte[]{0xa, 0xb};
+        this.repo.save("something", data);
+        this.repo.delete("something");
+        this.repo.load("something");
+    }
+
+    @Test(expected = UnknownResourceIdException.class)
+    public void testDeleteThrowsUnknownResourceExceptionIfNoResWithIdExists() {
+        this.repo.delete("something");
+    }
+
     @Test
     public void testSavedFileContainsGivenData() throws Exception {
         byte[] test_data = new byte[]{0xa, 0xb};

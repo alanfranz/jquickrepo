@@ -150,5 +150,23 @@ public class ByteArrayRepo {
         }
     }
 
+    public void delete(String id) throws UnknownResourceIdException {
+        validateId(id);
 
+        Lock writeLock = lockProvider.provideLock(id).writeLock();
+        writeLock.lock();
+        try {
+            File file = new File(persistenceDir, id);
+            boolean wasDeleted = file.delete();
+            if (!wasDeleted) {
+                throw new UnknownResourceIdException(id);
+            }
+        } finally {
+            writeLock.unlock();
+        }
+
+    }
 }
+
+
+
