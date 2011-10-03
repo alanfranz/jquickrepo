@@ -39,7 +39,7 @@ public class ByteArrayRepo {
     public void save(final String id, final byte[] data) {
         validateId(id);
 
-        ClosureLock writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
+        ClosureLock<Object> writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
         writeLock.executeWhileLocking(new WhileLocked<Object>() {
             @Override
             public Object execute() {
@@ -67,7 +67,7 @@ public class ByteArrayRepo {
     public void update(final String id, final byte[] data) {
         validateId(id);
 
-        ClosureLock writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
+        ClosureLock<Object> writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
         writeLock.executeWhileLocking(new WhileLocked<Object>() {
             @Override
             public Object execute() {
@@ -82,7 +82,7 @@ public class ByteArrayRepo {
     public void saveOrUpdate(final String id, final byte[] data) {
         validateId(id);
 
-        ClosureLock writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
+        ClosureLock<Object> writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
         writeLock.executeWhileLocking(new WhileLocked<Object>() {
             @Override
             public Object execute() {
@@ -139,55 +139,59 @@ public class ByteArrayRepo {
     }
 
     // TODO: make this method less complex.
-    public byte[] load(String id) throws UnknownResourceIdException {
+    public byte[] load(final String id) throws UnknownResourceIdException {
         // not required but suggested, as it prevents traversals.
         validateId(id);
-        try {
-            Lock readLock = lockProvider.provideLock(id).readLock();
-            readLock.lock();
-            try {
+
+        ClosureLock<byte[]> readLock = new ClosureLock<byte[]>(this.lockProvider.provideLock(id).readLock());
+
+        return readLock.executeWhileLocking(new WhileLocked<byte[]>() {
+            @Override
+            public byte[] execute() {
                 return getContents(id);
-            } finally {
-                readLock.unlock();
             }
+        });
+
+    }
+
+    private byte[] getContents(String id) throws UnknownResourceIdException {
+        try {
+            return Files.toByteArray(new File(persistenceDir, id));
         } catch (IOException e) {
             throw new UnknownResourceIdException(id, e);
         }
     }
 
-    private byte[] getContents(String id) throws IOException {
-        return Files.toByteArray(new File(persistenceDir, id));
-    }
-
-    public void delete(String id) throws UnknownResourceIdException {
+    public void delete(final String id) throws UnknownResourceIdException {
         validateId(id);
 
-        Lock writeLock = lockProvider.provideLock(id).writeLock();
-        writeLock.lock();
-        try {
-            File file = new File(persistenceDir, id);
-            boolean wasDeleted = file.delete();
-            if (!wasDeleted) {
-                throw new UnknownResourceIdException(id);
+        ClosureLock<Object> writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
+        writeLock.executeWhileLocking(new WhileLocked<Object>() {
+            @Override
+            public Object execute() {
+                File file = new File(persistenceDir, id);
+                boolean wasDeleted = file.delete();
+                if (!wasDeleted) {
+                    throw new UnknownResourceIdException(id);
+                }
+                return null;
             }
-        } finally {
-            writeLock.unlock();
-        }
+        });
 
     }
 
-    public void modifyWhileLocking(String id, DoWhileLocking<byte[]> doWhile) {
+    public void modifyWhileLocking(final String id, final DoWhileLocking<byte[]> doWhile) throws UnknownResourceIdException {
         validateId(id);
-        Lock writeLock = lockProvider.provideLock(id).writeLock();
-        writeLock.lock();
-        try {
-            byte[] newData = doWhile.execute(getContents(id));
-            persistData(id, newData);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            writeLock.unlock();
-        }
+
+        ClosureLock<Object> writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
+        writeLock.executeWhileLocking(new WhileLocked<Object>() {
+            @Override
+            public Object execute() {
+                byte[] newData = doWhile.execute(getContents(id));
+                persistData(id, newData);
+                return null;
+            }
+        });
 
 
     }
