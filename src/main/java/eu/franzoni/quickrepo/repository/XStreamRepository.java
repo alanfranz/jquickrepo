@@ -37,6 +37,19 @@ public class XStreamRepository<T> {
     public T load(String id) {
         return (T) this.xStream.fromXML(new String(this.diskRepo.load(id)));
     }
+    
+    public void modifyWhileLocking(final String id, final DoWhileLocking<T> whileLocking) throws UnknownResourceIdException {
+        this.diskRepo.modifyWhileLocking(id, new DoWhileLocking<byte[]>() {
+            @Override
+            public byte[] execute(byte[] data) {
+                return xStream.toXML(
+                        whileLocking.execute(
+                                (T) xStream.fromXML(new String(data)))).getBytes();
+
+            }
+        });
+        
+    }
 
 
 }
