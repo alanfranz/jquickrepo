@@ -44,7 +44,6 @@ public class ByteArrayRepo {
             @Override
             public Object execute() {
                 verifyResourceDoesNotExist(id);
-
                 persistData(id, data);
                 return null;
             }
@@ -147,13 +146,17 @@ public class ByteArrayRepo {
             Lock readLock = lockProvider.provideLock(id).readLock();
             readLock.lock();
             try {
-                return Files.toByteArray(new File(persistenceDir, id));
+                return getContents(id);
             } finally {
                 readLock.unlock();
             }
         } catch (IOException e) {
             throw new UnknownResourceIdException(id, e);
         }
+    }
+
+    private byte[] getContents(String id) throws IOException {
+        return Files.toByteArray(new File(persistenceDir, id));
     }
 
     public void delete(String id) throws UnknownResourceIdException {
@@ -178,7 +181,7 @@ public class ByteArrayRepo {
         Lock writeLock = lockProvider.provideLock(id).writeLock();
         writeLock.lock();
         try {
-            byte[] newData = doWhile.execute(Files.toByteArray(new File(persistenceDir, id)));
+            byte[] newData = doWhile.execute(getContents(id));
             persistData(id, newData);
         } catch (IOException e) {
             throw new RuntimeException(e);
