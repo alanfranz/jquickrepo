@@ -2,22 +2,24 @@ package eu.franzoni.quickrepo.repository;
 
 import com.google.common.io.Files;
 import junit.framework.TestCase;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class XStreamRepositoryTest extends TestCase {
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
+
+
     private File myTempDir;
     private XStreamRepository<List<String>> repo;
 
     @Before
     public void setUp() throws Exception {
-        myTempDir = Files.createTempDir();
+        myTempDir = tempFolder.newFolder("mytemp");
         repo = new XStreamRepository<List<String>>(myTempDir);
     }
 
