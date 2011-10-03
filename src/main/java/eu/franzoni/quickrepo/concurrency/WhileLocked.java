@@ -1,5 +1,5 @@
 package eu.franzoni.quickrepo.concurrency;
 
-public interface WhileLocked {
-    public void execute();
+public interface WhileLocked<T> {
+    public T execute();
 }

@@ -3,18 +3,18 @@ package eu.franzoni.quickrepo.concurrency;
 
 import java.util.concurrent.locks.Lock;
 
-public class ClosureLock {
+public class ClosureLock<T> {
     private Lock lock;
 
     public ClosureLock(Lock lock) {
         this.lock = lock;
     }
 
-    public void executeWhileLocking(WhileLocked whileLocked) {
+    public T executeWhileLocking(WhileLocked<T> whileLocked) {
         this.lock.lock();
 
         try {
-            whileLocked.execute();
+            return whileLocked.execute();
         } finally {
             this.lock.unlock();
         }

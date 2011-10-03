@@ -44,21 +44,25 @@ public class ClosureLockTest extends TestCase {
         }
     }
 
-    // TODO: improve this basic test.
+    // TODO: improve and split this basic test.
     @Test
     public void testLockAndUnlockHappensAroundExecution() throws Exception {
         MockLock innerLock = new MockLock();
-        ClosureLock lock = new ClosureLock(innerLock);
+        ClosureLock lock = new ClosureLock<Object>(innerLock);
+        
+        final Object obj = new Object();
 
-        lock.executeWhileLocking(new WhileLocked() {
+        Object ret = lock.executeWhileLocking(new WhileLocked<Object>() {
             @Override
-            public void execute() {
-                            }
+            public Object execute() {
+                return obj;
+            }
         });
 
+        Assert.assertTrue(obj == ret);
         Assert.assertTrue(innerLock.locked);
         Assert.assertTrue(innerLock.unlocked);
 
-        
+
     }
 }
