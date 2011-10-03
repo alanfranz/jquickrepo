@@ -159,5 +159,32 @@ public class ByteArrayRepoTest {
 
     }
 
+    @Test(expected = UnknownResourceIdException.class)
+    public void testModifyWhileLockingFailsIfMissingId() throws Exception {
+        this.repo.modifyWhileLocking("some", new DoWhileLocking<byte[]>() {
+            @Override
+            public byte[] execute(byte[] data) {
+                return new byte[]{0xa, 0xb};
+            }
+        });
+
+    }
+
+
+
+    @Test
+    public void testModifyWhileLockingDoestnUseMissingIfAlreadyInRepo() throws Exception {
+        this.repo.modifyWhileLocking("some", new DoWhileLocking<byte[]>() {
+            @Override
+            public byte[] execute(byte[] data) {
+                return new byte[]{0xa, 0xb};
+            }
+        }, new byte[]{0xc, 0xf});
+
+        Assert.assertTrue(Arrays.equals(new byte[]{0xa, 0xb}, this.repo.load("some")));
+
+
+    }
+
 
 }

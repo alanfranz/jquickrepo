@@ -38,6 +38,7 @@ public class XStreamRepository<T> {
         return (T) this.xStream.fromXML(new String(this.diskRepo.load(id)));
     }
     
+
     public void modifyWhileLocking(final String id, final DoWhileLocking<T> whileLocking) throws UnknownResourceIdException {
         this.diskRepo.modifyWhileLocking(id, new DoWhileLocking<byte[]>() {
             @Override
@@ -48,8 +49,20 @@ public class XStreamRepository<T> {
 
             }
         });
-        
     }
 
+    public void modifyWhileLocking(final String id, final DoWhileLocking<T> whileLocking, final T missing) throws UnknownResourceIdException {
+        this.diskRepo.modifyWhileLocking(id, new DoWhileLocking<byte[]>() {
+            @Override
+            public byte[] execute(byte[] data) {
+                return xStream.toXML(
+                        whileLocking.execute(
+                                (T) xStream.fromXML(new String(data)))).getBytes();
+
+            }
+        }, xStream.toXML(missing).getBytes());
+
+    }
+    
 
 }

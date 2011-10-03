@@ -192,7 +192,28 @@ public class ByteArrayRepo {
                 return null;
             }
         });
+    }
 
+    public void modifyWhileLocking(final String id, final DoWhileLocking<byte[]> doWhile, final byte[] missing) throws UnknownResourceIdException {
+            validateId(id);
+
+            ClosureLock<Object> writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
+            writeLock.executeWhileLocking(new WhileLocked<Object>() {
+                @Override
+                public Object execute() {
+                    byte[] data;
+                    try {
+                        data = getContents(id);
+                    } catch (UnknownResourceIdException e) {
+                        data = missing;
+
+                    }
+
+                    byte[] newData = doWhile.execute(data);
+                    persistData(id, newData);
+                    return null;
+                }
+            });
 
     }
 }
