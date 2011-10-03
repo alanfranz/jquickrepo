@@ -1,13 +1,14 @@
 package eu.franzoni.quickrepo.repository;
 
 import com.google.common.io.Files;
+import eu.franzoni.quickrepo.concurrency.ClosureLock;
 import eu.franzoni.quickrepo.concurrency.MultipleResourceLock;
+import eu.franzoni.quickrepo.concurrency.WhileLocked;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
 
 
@@ -35,17 +36,20 @@ public class ByteArrayRepo {
         }
     }
 
-    public void save(String id, byte[] data) {
+    public void save(final String id, final byte[] data) {
         validateId(id);
 
-        Lock writeLock = lockProvider.provideLock(id).writeLock();
-        writeLock.lock();
-        try {
-            verifyResourceDoesNotExist(id);
-            persistData(id, data);
-        } finally {
-            writeLock.unlock();
-        }
+        ClosureLock writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
+        writeLock.executeWhileLocking(new WhileLocked<Object>() {
+            @Override
+            public Object execute() {
+                verifyResourceDoesNotExist(id);
+
+                persistData(id, data);
+                return null;
+            }
+        });
+
 
     }
 
@@ -61,31 +65,32 @@ public class ByteArrayRepo {
         }
     }
 
-    public void update(String id, byte[] data) {
+    public void update(final String id, final byte[] data) {
         validateId(id);
 
-        Lock writeLock = lockProvider.provideLock(id).writeLock();
-        writeLock.lock();
-        try {
-            verifyResourceExists(id);
-            persistData(id, data);
-        } finally {
-            writeLock.unlock();
-        }
+        ClosureLock writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
+        writeLock.executeWhileLocking(new WhileLocked<Object>() {
+            @Override
+            public Object execute() {
+                verifyResourceExists(id);
+                persistData(id, data);
+                return null;
+            }
+        });
 
     }
 
-    public void saveOrUpdate(String id, byte[] data) {
+    public void saveOrUpdate(final String id, final byte[] data) {
         validateId(id);
 
-        Lock writeLock = lockProvider.provideLock(id).writeLock();
-        writeLock.lock();
-        try {
-            persistData(id, data);
-        } finally {
-            writeLock.unlock();
-        }
-
+        ClosureLock writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
+        writeLock.executeWhileLocking(new WhileLocked<Object>() {
+            @Override
+            public Object execute() {
+                persistData(id, data);
+                return null;
+            }
+        });
     }
 
     private void persistData(String id, byte[] data) {
