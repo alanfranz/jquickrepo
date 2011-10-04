@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/quickrepo.iml" filepath="$PROJECT_DIR$/quickrepo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jquickrepo.iml" filepath="$PROJECT_DIR$/jquickrepo.iml" />
     </modules>
   </component>
 </project>
