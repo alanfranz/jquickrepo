@@ -5,8 +5,36 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>eu.franzoni</groupId>
-    <artifactId>quickrepo</artifactId>
+    <artifactId>jquickrepo</artifactId>
     <version>1.4-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>Quick Repository Library</name>
+    <description>A simple repository library</description>
+    <url>http://jquickrepo.franzoni.eu</url>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://bitbucket.org/Alan/jquickrepo</url>
+        <connection>scm:hg:https://bitbucket.org/Alan/jquickrepo</connection>
+        <developerConnection>scm:hg:scm:hg:https://Alan@bitbucket.org/Alan/jquickrepo</developerConnection>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>alan</id>
+            <name>Alan Franzoni</name>
+            <email>username@franzoni.eu</email>
+        </developer>
+    </developers>
+
     <build>
         <plugins>
             <plugin>
@@ -40,11 +68,11 @@
     </dependencies>
 
     <!--<distributionManagement>-->
-        <!--<repository>-->
-            <!--<id>nexus</id>-->
-            <!--<name>localmaven</name>-->
-            <!--<url>http://mavenrepo.lan/nexus/content/repositories/releases</url>-->
-        <!--</repository>-->
+    <!--<repository>-->
+    <!--<id>nexus</id>-->
+    <!--<name>localmaven</name>-->
+    <!--<url>http://mavenrepo.lan/nexus/content/repositories/releases</url>-->
+    <!--</repository>-->
     <!--</distributionManagement>-->
 
     <properties>
