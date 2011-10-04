@@ -1,4 +1,4 @@
-package eu.franzoni.quickrepo.repository;
+package eu.franzoni.jquickrepo.repository;
 
 
 public class MissingIdException extends RuntimeException {

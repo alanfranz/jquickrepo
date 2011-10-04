@@ -1,4 +1,4 @@
-package eu.franzoni.quickrepo.repository;
+package eu.franzoni.jquickrepo.repository;
 
 import com.google.common.io.Files;
 import junit.framework.TestCase;

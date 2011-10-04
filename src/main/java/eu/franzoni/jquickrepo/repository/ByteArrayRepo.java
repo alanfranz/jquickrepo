@@ -1,15 +1,14 @@
-package eu.franzoni.quickrepo.repository;
+package eu.franzoni.jquickrepo.repository;
 
 import com.google.common.io.Files;
-import eu.franzoni.quickrepo.concurrency.ClosureLock;
-import eu.franzoni.quickrepo.concurrency.MultipleResourceLock;
-import eu.franzoni.quickrepo.concurrency.WhileLocked;
+import eu.franzoni.jquickrepo.concurrency.ClosureLock;
+import eu.franzoni.jquickrepo.concurrency.MultipleResourceLock;
+import eu.franzoni.jquickrepo.concurrency.WhileLocked;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.concurrent.locks.Lock;
 
 
 public class ByteArrayRepo {

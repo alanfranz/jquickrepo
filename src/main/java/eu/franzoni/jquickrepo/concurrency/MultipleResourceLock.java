@@ -1,4 +1,4 @@
-package eu.franzoni.quickrepo.concurrency;
+package eu.franzoni.jquickrepo.concurrency;
 
 import com.google.common.collect.MapMaker;
 

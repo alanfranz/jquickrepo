@@ -1,6 +1,5 @@
-package eu.franzoni.quickrepo.repository;
+package eu.franzoni.jquickrepo.repository;
 
-import com.google.common.io.Files;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
 
