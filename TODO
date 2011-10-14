@@ -1,0 +1,9 @@
+* quickly
+
+- define a base + extended? interface for repositories
+- add versioning support
+
+* NA
+- add JTA support.
+- add other serialization means
+- split POM in multiple subpackages
