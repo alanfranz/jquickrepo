@@ -38,10 +38,10 @@ public class ByteArrayRepo {
     public void save(final String id, final byte[] data) {
         validateId(id);
 
-        ClosureLock<Object> writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
-        writeLock.executeWhileLocking(new WhileLocked<Object>() {
+        ClosureLock<Void> writeLock = new ClosureLock<Void>(lockProvider.provideLock(id).writeLock());
+        writeLock.executeWhileLocking(new WhileLocked<Void>() {
             @Override
-            public Object execute() {
+            public Void execute() {
                 verifyResourceDoesNotExist(id);
                 persistData(id, data);
                 return null;
@@ -66,10 +66,10 @@ public class ByteArrayRepo {
     public void update(final String id, final byte[] data) {
         validateId(id);
 
-        ClosureLock<Object> writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
-        writeLock.executeWhileLocking(new WhileLocked<Object>() {
+        ClosureLock<Void> writeLock = new ClosureLock<Void>(lockProvider.provideLock(id).writeLock());
+        writeLock.executeWhileLocking(new WhileLocked<Void>() {
             @Override
-            public Object execute() {
+            public Void execute() {
                 verifyResourceExists(id);
                 persistData(id, data);
                 return null;
@@ -81,10 +81,10 @@ public class ByteArrayRepo {
     public void saveOrUpdate(final String id, final byte[] data) {
         validateId(id);
 
-        ClosureLock<Object> writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
-        writeLock.executeWhileLocking(new WhileLocked<Object>() {
+        ClosureLock<Void> writeLock = new ClosureLock<Void>(lockProvider.provideLock(id).writeLock());
+        writeLock.executeWhileLocking(new WhileLocked<Void>() {
             @Override
-            public Object execute() {
+            public Void execute() {
                 persistData(id, data);
                 return null;
             }
@@ -164,10 +164,10 @@ public class ByteArrayRepo {
     public void delete(final String id) throws UnknownResourceIdException {
         validateId(id);
 
-        ClosureLock<Object> writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
-        writeLock.executeWhileLocking(new WhileLocked<Object>() {
+        ClosureLock<Void> writeLock = new ClosureLock<Void>(lockProvider.provideLock(id).writeLock());
+        writeLock.executeWhileLocking(new WhileLocked<Void>() {
             @Override
-            public Object execute() {
+            public Void execute() {
                 File file = new File(persistenceDir, id);
                 boolean wasDeleted = file.delete();
                 if (!wasDeleted) {
@@ -182,10 +182,10 @@ public class ByteArrayRepo {
     public void modifyWhileLocking(final String id, final DoWhileLocking<byte[]> doWhile) throws UnknownResourceIdException {
         validateId(id);
 
-        ClosureLock<Object> writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
-        writeLock.executeWhileLocking(new WhileLocked<Object>() {
+        ClosureLock<Void> writeLock = new ClosureLock<Void>(lockProvider.provideLock(id).writeLock());
+        writeLock.executeWhileLocking(new WhileLocked<Void>() {
             @Override
-            public Object execute() {
+            public Void execute() {
                 byte[] newData = doWhile.execute(getContents(id));
                 persistData(id, newData);
                 return null;
@@ -196,10 +196,10 @@ public class ByteArrayRepo {
     public void modifyWhileLocking(final String id, final DoWhileLocking<byte[]> doWhile, final byte[] missing) throws UnknownResourceIdException {
             validateId(id);
 
-            ClosureLock<Object> writeLock = new ClosureLock<Object>(lockProvider.provideLock(id).writeLock());
-            writeLock.executeWhileLocking(new WhileLocked<Object>() {
+            ClosureLock<Void> writeLock = new ClosureLock<Void>(lockProvider.provideLock(id).writeLock());
+            writeLock.executeWhileLocking(new WhileLocked<Void>() {
                 @Override
-                public Object execute() {
+                public Void execute() {
                     byte[] data;
                     try {
                         data = getContents(id);
