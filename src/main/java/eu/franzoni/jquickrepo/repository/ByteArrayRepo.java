@@ -10,8 +10,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-
 public class ByteArrayRepo {
+
     final private File persistenceDir;
     final private MultipleResourceLock lockProvider = new MultipleResourceLock();
 
@@ -105,10 +105,14 @@ public class ByteArrayRepo {
     }
 
     private void renameDataFileToFinalName(String id, File datafile) {
-        boolean succeeded = datafile.renameTo(new File(this.persistenceDir, id));
+        final File finalFile = new File(this.persistenceDir, id);
+        boolean succeeded = datafile.renameTo(finalFile);
 
         if (!succeeded) {
-            throw new RuntimeException("could not rename file to final name!");
+            boolean existingOld = datafile.exists();
+            boolean existingNew = finalFile.exists();
+
+            throw new RuntimeException(String.format("could not rename (exists: %s) %s to (exists: %s) %s", existingOld, datafile.getAbsolutePath(), existingNew, finalFile.getAbsolutePath()));
         }
     }
 
@@ -128,9 +132,19 @@ public class ByteArrayRepo {
     private File createTemporaryDataFile(String id) {
         File datafile = new File(this.persistenceDir, id + ".part");
 
+        if (datafile.exists()) {
+            throw new RuntimeException(String.format("Part file exists already: %s", datafile.getAbsolutePath()));
+        }
+
         // this is required only in order to check whether the name is too long.
         try {
-            datafile.createNewFile();
+            boolean created = datafile.createNewFile();
+            if (datafile.exists() && !created) {
+                throw new RuntimeException(String.format("Part file exists already but was not created: %s", datafile.getAbsolutePath()));
+            }
+            if (!created) {
+                throw new RuntimeException(String.format("Could not create %s", datafile.getAbsolutePath()));
+            }
         } catch (IOException e) {
             throw new BadIdException(id, "too long for the underlying filesystem", e);
         }
@@ -194,28 +208,25 @@ public class ByteArrayRepo {
     }
 
     public void modifyWhileLocking(final String id, final DoWhileLocking<byte[]> doWhile, final byte[] missing) throws UnknownResourceIdException {
-            validateId(id);
+        validateId(id);
 
-            ClosureLock<Void> writeLock = new ClosureLock<Void>(lockProvider.provideLock(id).writeLock());
-            writeLock.executeWhileLocking(new WhileLocked<Void>() {
-                @Override
-                public Void execute() {
-                    byte[] data;
-                    try {
-                        data = getContents(id);
-                    } catch (UnknownResourceIdException e) {
-                        data = missing;
+        ClosureLock<Void> writeLock = new ClosureLock<Void>(lockProvider.provideLock(id).writeLock());
+        writeLock.executeWhileLocking(new WhileLocked<Void>() {
+            @Override
+            public Void execute() {
+                byte[] data;
+                try {
+                    data = getContents(id);
+                } catch (UnknownResourceIdException e) {
+                    data = missing;
 
-                    }
-
-                    byte[] newData = doWhile.execute(data);
-                    persistData(id, newData);
-                    return null;
                 }
-            });
+
+                byte[] newData = doWhile.execute(data);
+                persistData(id, newData);
+                return null;
+            }
+        });
 
     }
 }
-
-
-
