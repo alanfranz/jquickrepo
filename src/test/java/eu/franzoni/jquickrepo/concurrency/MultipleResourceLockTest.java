@@ -1,8 +1,13 @@
 package eu.franzoni.jquickrepo.concurrency;
 
 import junit.framework.Assert;
+import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -15,11 +20,67 @@ import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class MultipleResourceLockTest {
-    final int LOCKS_COUNT = 100;
-    final int THREAD_COUNT = 25;
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
+
+    final int LOCKS_COUNT = 1000;
+    final int THREAD_COUNT = 2000;
+
+    @Test
+    public void testMultipleResourceLockActuallySharesSingleLockForResource() throws Exception {
+
+        final MultipleResourceLock bigLock = new MultipleResourceLock();
+
+//        Collection<Callable<ReadWriteLock>> tasks = new ArrayList<Callable<ReadWriteLock>>();
+
+        final File testFolder = tempFolder.getRoot();
+
+        // Tasks - each task makes exactly one service invocation.
+//        for (int i = 0; i<THREAD_COUNT; i++){
+        Callable<ReadWriteLock> callable = new Callable<ReadWriteLock>() {
+            public ReadWriteLock call() throws Exception {
+                ClosureLock<String> closureLock = new ClosureLock<String>(bigLock.provideLock("sameid").writeLock());
+
+                closureLock.executeWhileLocking(new WhileLocked<String>() {
+                    @Override
+                    public String execute() {
+                        File f = new File(testFolder, "myfilename");
+                        Assert.assertFalse("file must not exist", f.exists());
+                        boolean created = false;
+                        try {
+                            created = f.createNewFile();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                        Assert.assertTrue("must be created", created);
+                        Assert.assertTrue("must exist", f.exists());
+                        boolean deleted = f.delete();
+                        Assert.assertTrue("must be deleted", deleted);
+                        Assert.assertFalse("must not exist", f.exists());
+                        return "";
+                    }
+                });
+
+
+                return null;
+            }
+        };
+
+        List<Callable<ReadWriteLock>> tasks = Collections.nCopies(THREAD_COUNT, callable);
+        ExecutorService executorService = Executors.newFixedThreadPool(THREAD_COUNT);
+        List<Future<ReadWriteLock>> futures = executorService.invokeAll(tasks); // invokeAll() blocks until all tasks have run.
+
+        for (Future<ReadWriteLock> future : futures) {
+            ReadWriteLock lock = future.get(); // get() will throw an exception if an exception was thrown by the service.
+        }
+
+        System.out.println(futures.size());
+
+    }
 
 
     // TODO: this is an integration test, not a real unit test, change name and scope.
+    @Ignore
     @Test
     public void testLocksDontChoke() throws Exception {
 
