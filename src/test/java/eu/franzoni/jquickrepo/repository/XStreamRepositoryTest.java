@@ -15,12 +15,12 @@ public class XStreamRepositoryTest extends TestCase {
 
 
     private File myTempDir;
-    private XStreamRepository<List<String>> repo;
+    private MarshallingRepository<List<String>> repo;
 
     @Before
     public void setUp() throws Exception {
         myTempDir = tempFolder.newFolder("mytemp");
-        repo = new XStreamRepository<List<String>>(myTempDir);
+        repo = new MarshallingRepository<List<String>>(myTempDir);
     }
 
     @After
