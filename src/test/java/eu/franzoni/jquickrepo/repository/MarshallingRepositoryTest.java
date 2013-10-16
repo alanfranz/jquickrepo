@@ -6,7 +6,7 @@ import org.junit.rules.TemporaryFolder;
 import java.util.ArrayList;
 import java.util.List;
 
-public class XStreamRepositoryTest {
+public class MarshallingRepositoryTest {
 
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
