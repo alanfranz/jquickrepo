@@ -22,16 +22,16 @@ public class ByteArrayRepo {
 
     private void validatePersistenceDir(File persistenceDir) {
         if (!persistenceDir.isDirectory()) {
-            throw new RuntimeException("persistence dir must be a directory");
+            throw new IllegalArgumentException("persistence dir must be a directory");
         }
 
         if (!persistenceDir.canWrite()) {
-            throw new RuntimeException("persistence dir must be writeable");
+            throw new IllegalArgumentException("persistence dir must be writeable");
 
         }
 
         if (!persistenceDir.canRead()) {
-            throw new RuntimeException("persistence dir must be readable");
+            throw new IllegalArgumentException("persistence dir must be readable");
         }
     }
 
