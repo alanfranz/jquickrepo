@@ -1,46 +1,42 @@
 package eu.franzoni.jquickrepo.concurrency;
 
-import eu.franzoni.jquickrepo.repository.ByteArrayRepo;
-import eu.franzoni.jquickrepo.repository.DoWhileLocking;
-import eu.franzoni.jquickrepo.repository.MarshallingRepository;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-
+import eu.franzoni.jquickrepo.repository.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
-public class ConcurrentAccessByteArrayRepoTest {
+public class ConcurrentAccessMarshallingRepositoryIT {
 
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
 
     @Test
     public void runModifyWhileLocking() throws Exception {
-        ByteArrayRepo byteArrayRepo = new ByteArrayRepo(tempFolder.getRoot());
-        test(1000, byteArrayRepo);
+        MarshallingRepository<List<String>> repo = new MarshallingRepository<List<String>>(tempFolder.getRoot());
+        test(1000, repo);
     }
 
-    private void test(final int threadCount, final ByteArrayRepo repo) throws Exception {
+    private void test(final int threadCount, final MarshallingRepository<List<String>> repo) throws Exception {
 
         Callable<Void> task = new Callable<Void>() {
             @Override
             public Void call() {
-                repo.modifyWhileLocking("asd", new DoWhileLocking<byte[]>() {
+                repo.modifyWhileLocking("asd", new DoWhileLocking<List<String>>() {
                     @Override
-                    public byte[] execute(byte[] data) {
-                        byte[] copy = Arrays.copyOf(data, data.length + 1);
-                        copy[data.length] = 'a';
+                    public List<String> execute(List<String> data) {
+                        List<String> copy = new ArrayList<String>(data);
+                        copy.add("a");
                         return copy;
                     }
-                }, new byte[0]);
+                }, Collections.<String>emptyList());
                 return null;
             }
         };
@@ -63,6 +59,6 @@ public class ConcurrentAccessByteArrayRepoTest {
         }
         // Validate the IDs
         Assert.assertEquals(goodCount, threadCount);
-        Assert.assertEquals(threadCount, repo.load("asd").length);
+        Assert.assertEquals(threadCount, repo.load("asd").size());
     }
 }
