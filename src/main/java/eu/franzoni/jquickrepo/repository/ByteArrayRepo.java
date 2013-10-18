@@ -8,10 +8,101 @@ import eu.franzoni.jquickrepo.concurrency.WhileLocked;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 public class ByteArrayRepo {
 
+    private byte[] doLoad(final String id) {
+        // not required but suggested, as it prevents traversals.
+        validateId(id);
+
+        ScopedReadWriteLock<byte[]> scopedLock = new ScopedReadWriteLock<byte[]>(this.lockProvider.provideLock(id));
+
+        return scopedLock.executeWithReadLock(new WhileLocked<byte[]>() {
+            @Override
+            public byte[] execute() {
+                return getContents(id);
+            }
+        });
+    }
+
+    public static class Item {
+
+        private final String id;
+
+        public String getId() {
+            return id;
+        }
+
+        public byte[] getData() {
+            return data;
+        }
+        private final byte[] data;
+
+        public Item(String id, byte[] data) {
+            this.id = id;
+            this.data = data;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 3;
+            hash = 29 * hash + (this.id != null ? this.id.hashCode() : 0);
+            hash = 29 * hash + Arrays.hashCode(this.data);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final Item other = (Item) obj;
+            if ((this.id == null) ? (other.id != null) : !this.id.equals(other.id)) {
+                return false;
+            }
+            if (!Arrays.equals(this.data, other.data)) {
+                return false;
+            }
+            return true;
+        }
+        
+        
+    }
+
+    public static class ItemIterator implements Iterator<Item> {
+
+        private final Iterator<File> filesIterator;
+        private final ByteArrayRepo filesRepo;
+
+        public ItemIterator(Iterator<File> filesIterator, ByteArrayRepo repo) {
+            this.filesIterator = filesIterator;
+            this.filesRepo = repo;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.filesIterator.hasNext();
+        }
+
+        @Override
+        public Item next() {
+            final String id = this.filesIterator.next().getName();
+            return new Item(id, this.filesRepo.doLoad(id));
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Removal is unsupported.");
+        }
+    }
     final private File persistenceDir;
     final private MultipleResourceLock lockProvider = new MultipleResourceLock();
 
@@ -153,17 +244,7 @@ public class ByteArrayRepo {
 
     // TODO: make this method less complex.
     public byte[] load(final String id) throws UnknownResourceIdException {
-        // not required but suggested, as it prevents traversals.
-        validateId(id);
-
-        ScopedReadWriteLock<byte[]> scopedLock = new ScopedReadWriteLock<byte[]>(this.lockProvider.provideLock(id));
-
-        return scopedLock.executeWithReadLock(new WhileLocked<byte[]>() {
-            @Override
-            public byte[] execute() {
-                return getContents(id);
-            }
-        });
+        return doLoad(id);
 
     }
 
@@ -191,6 +272,21 @@ public class ByteArrayRepo {
             }
         });
 
+    }
+
+    /**
+     * Behaviour if items are deleted while iterating is undefined; it items are added, they won't appear.
+     * @return 
+     */
+    public Iterator<Item> searchAll() {
+        File[] allFiles = this.persistenceDir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return (!name.endsWith(".part") && !name.startsWith("."));
+            }
+        });
+        
+        return new ItemIterator(Arrays.asList(allFiles).iterator(), this);
     }
 
     public void modifyWhileLocking(final String id, final DoWhileLocking<byte[]> doWhile) throws UnknownResourceIdException {
