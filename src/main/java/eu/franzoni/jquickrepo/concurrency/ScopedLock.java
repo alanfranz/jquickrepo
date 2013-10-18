@@ -3,10 +3,10 @@ package eu.franzoni.jquickrepo.concurrency;
 
 import java.util.concurrent.locks.Lock;
 
-public class ClosureLock<T> {
+public class ScopedLock<T> {
     private Lock lock;
 
-    public ClosureLock(Lock lock) {
+    public ScopedLock(Lock lock) {
         this.lock = lock;
     }
 

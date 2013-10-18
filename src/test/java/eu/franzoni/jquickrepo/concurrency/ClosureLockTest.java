@@ -48,7 +48,7 @@ public class ClosureLockTest extends TestCase {
     @Test
     public void testLockAndUnlockHappensAroundExecution() throws Exception {
         MockLock innerLock = new MockLock();
-        ClosureLock lock = new ClosureLock<Object>(innerLock);
+        ScopedLock lock = new ScopedLock<Object>(innerLock);
         
         final Object obj = new Object();
 

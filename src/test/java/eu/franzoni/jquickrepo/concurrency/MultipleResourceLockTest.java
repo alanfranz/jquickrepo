@@ -39,7 +39,7 @@ public class MultipleResourceLockTest {
 //        for (int i = 0; i<THREAD_COUNT; i++){
         Callable<ReadWriteLock> callable = new Callable<ReadWriteLock>() {
             public ReadWriteLock call() throws Exception {
-                ClosureLock<String> closureLock = new ClosureLock<String>(bigLock.provideLock("sameid").writeLock());
+                ScopedLock<String> closureLock = new ScopedLock<String>(bigLock.provideLock("sameid").writeLock());
 
                 closureLock.executeWhileLocking(new WhileLocked<String>() {
                     @Override
