@@ -7,9 +7,27 @@ import org.junit.Test;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 
 public class ClosureLockTest extends TestCase {
-    public class MockLock implements Lock {
+
+    public class MockReadWriteLock implements ReadWriteLock {
+
+        private Lock writeLock = new MockWriteLock();
+
+        @Override
+        public Lock readLock() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Lock writeLock() {
+            return this.writeLock;
+        }
+    }
+
+    public class MockWriteLock implements Lock {
+
         public boolean locked = false;
         public boolean unlocked = false;
 
@@ -47,21 +65,23 @@ public class ClosureLockTest extends TestCase {
     // TODO: improve and split this basic test.
     @Test
     public void testLockAndUnlockHappensAroundExecution() throws Exception {
-        MockLock innerLock = new MockLock();
-        ScopedLock lock = new ScopedLock<Object>(innerLock);
-        
+        ReadWriteLock innerLock = new MockReadWriteLock();
+        ScopedReadWriteLock lock = new ScopedReadWriteLock<Object>(innerLock);
+
         final Object obj = new Object();
 
-        Object ret = lock.executeWhileLocking(new WhileLocked<Object>() {
+        Object ret = lock.executeWithWriteLock(new WhileLocked<Object>() {
             @Override
             public Object execute() {
                 return obj;
             }
         });
 
+        final MockWriteLock writeLock = (MockWriteLock) innerLock.writeLock();
+
         Assert.assertTrue(obj == ret);
-        Assert.assertTrue(innerLock.locked);
-        Assert.assertTrue(innerLock.unlocked);
+        Assert.assertTrue(writeLock.locked);
+        Assert.assertTrue(writeLock.unlocked);
 
 
     }

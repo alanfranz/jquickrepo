@@ -20,9 +20,9 @@ import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class MultipleResourceLockTest {
+
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
-
     final int LOCKS_COUNT = 1000;
     final int THREAD_COUNT = 2000;
 
@@ -39,9 +39,9 @@ public class MultipleResourceLockTest {
 //        for (int i = 0; i<THREAD_COUNT; i++){
         Callable<ReadWriteLock> callable = new Callable<ReadWriteLock>() {
             public ReadWriteLock call() throws Exception {
-                ScopedLock<String> closureLock = new ScopedLock<String>(bigLock.provideLock("sameid").writeLock());
+                ScopedReadWriteLock<String> closureLock = new ScopedReadWriteLock<String>(bigLock.provideLock("sameid"));
 
-                closureLock.executeWhileLocking(new WhileLocked<String>() {
+                closureLock.executeWithWriteLock(new WhileLocked<String>() {
                     @Override
                     public String execute() {
                         File f = new File(testFolder, "myfilename");
@@ -77,7 +77,6 @@ public class MultipleResourceLockTest {
         System.out.println(futures.size());
 
     }
-
 
     // TODO: this is an integration test, not a real unit test, change name and scope.
     @Ignore
@@ -156,5 +155,4 @@ public class MultipleResourceLockTest {
 
 
     }
-
 }

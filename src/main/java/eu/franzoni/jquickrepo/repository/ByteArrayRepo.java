@@ -1,7 +1,7 @@
 package eu.franzoni.jquickrepo.repository;
 
 import com.google.common.io.Files;
-import eu.franzoni.jquickrepo.concurrency.ScopedLock;
+import eu.franzoni.jquickrepo.concurrency.ScopedReadWriteLock;
 import eu.franzoni.jquickrepo.concurrency.MultipleResourceLock;
 import eu.franzoni.jquickrepo.concurrency.WhileLocked;
 
@@ -38,8 +38,8 @@ public class ByteArrayRepo {
     public void save(final String id, final byte[] data) {
         validateId(id);
 
-        ScopedLock<Void> writeLock = new ScopedLock<Void>(lockProvider.provideLock(id).writeLock());
-        writeLock.executeWhileLocking(new WhileLocked<Void>() {
+        ScopedReadWriteLock<Void> scopedLock = new ScopedReadWriteLock<Void>(lockProvider.provideLock(id));
+        scopedLock.executeWithWriteLock(new WhileLocked<Void>() {
             @Override
             public Void execute() {
                 verifyResourceDoesNotExist(id);
@@ -66,8 +66,8 @@ public class ByteArrayRepo {
     public void update(final String id, final byte[] data) {
         validateId(id);
 
-        ScopedLock<Void> writeLock = new ScopedLock<Void>(lockProvider.provideLock(id).writeLock());
-        writeLock.executeWhileLocking(new WhileLocked<Void>() {
+        ScopedReadWriteLock<Void> scopedLock = new ScopedReadWriteLock<Void>(lockProvider.provideLock(id));
+        scopedLock.executeWithWriteLock(new WhileLocked<Void>() {
             @Override
             public Void execute() {
                 verifyResourceExists(id);
@@ -81,8 +81,8 @@ public class ByteArrayRepo {
     public void saveOrUpdate(final String id, final byte[] data) {
         validateId(id);
 
-        ScopedLock<Void> writeLock = new ScopedLock<Void>(lockProvider.provideLock(id).writeLock());
-        writeLock.executeWhileLocking(new WhileLocked<Void>() {
+        ScopedReadWriteLock<Void> scopedLock = new ScopedReadWriteLock<Void>(lockProvider.provideLock(id));
+        scopedLock.executeWithWriteLock(new WhileLocked<Void>() {
             @Override
             public Void execute() {
                 persistData(id, data);
@@ -156,9 +156,9 @@ public class ByteArrayRepo {
         // not required but suggested, as it prevents traversals.
         validateId(id);
 
-        ScopedLock<byte[]> readLock = new ScopedLock<byte[]>(this.lockProvider.provideLock(id).readLock());
+        ScopedReadWriteLock<byte[]> scopedLock = new ScopedReadWriteLock<byte[]>(this.lockProvider.provideLock(id));
 
-        return readLock.executeWhileLocking(new WhileLocked<byte[]>() {
+        return scopedLock.executeWithReadLock(new WhileLocked<byte[]>() {
             @Override
             public byte[] execute() {
                 return getContents(id);
@@ -178,8 +178,8 @@ public class ByteArrayRepo {
     public void delete(final String id) throws UnknownResourceIdException {
         validateId(id);
 
-        ScopedLock<Void> writeLock = new ScopedLock<Void>(lockProvider.provideLock(id).writeLock());
-        writeLock.executeWhileLocking(new WhileLocked<Void>() {
+        ScopedReadWriteLock<Void> scopedLock = new ScopedReadWriteLock<Void>(lockProvider.provideLock(id));
+        scopedLock.executeWithWriteLock(new WhileLocked<Void>() {
             @Override
             public Void execute() {
                 File file = new File(persistenceDir, id);
@@ -196,8 +196,8 @@ public class ByteArrayRepo {
     public void modifyWhileLocking(final String id, final DoWhileLocking<byte[]> doWhile) throws UnknownResourceIdException {
         validateId(id);
 
-        ScopedLock<Void> writeLock = new ScopedLock<Void>(lockProvider.provideLock(id).writeLock());
-        writeLock.executeWhileLocking(new WhileLocked<Void>() {
+        ScopedReadWriteLock<Void> scopedLock = new ScopedReadWriteLock<Void>(lockProvider.provideLock(id));
+        scopedLock.executeWithWriteLock(new WhileLocked<Void>() {
             @Override
             public Void execute() {
                 byte[] newData = doWhile.execute(getContents(id));
@@ -210,8 +210,8 @@ public class ByteArrayRepo {
     public void modifyWhileLocking(final String id, final DoWhileLocking<byte[]> doWhile, final byte[] missing) throws UnknownResourceIdException {
         validateId(id);
 
-        ScopedLock<Void> writeLock = new ScopedLock<Void>(lockProvider.provideLock(id).writeLock());
-        writeLock.executeWhileLocking(new WhileLocked<Void>() {
+        ScopedReadWriteLock<Void> scopedLock = new ScopedReadWriteLock<Void>(lockProvider.provideLock(id));
+        scopedLock.executeWithWriteLock(new WhileLocked<Void>() {
             @Override
             public Void execute() {
                 byte[] data;
