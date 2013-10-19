@@ -11,15 +11,12 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 public class ByteArrayRepo implements Repository<byte[]> {
 
     @Override
-    public Collection<Entry<byte[]>> loadAll() {
+    public List<Entry<byte[]>> loadAll() {
         File[] allFiles = this.persistenceDir.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {

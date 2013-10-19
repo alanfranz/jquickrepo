@@ -8,11 +8,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 
 public class ByteArrayRepoTest {
@@ -196,22 +192,26 @@ public class ByteArrayRepoTest {
         this.repo.saveOrUpdate("some", new byte[]{0xc, 0xf});
         this.repo.saveOrUpdate("else", new byte[]{0xc, 0xe});
         this.repo.saveOrUpdate("third", new byte[]{0xc, 0xd});
-        
-        Collection<Entry<byte[]>> all = this.repo.loadAll();
-        
-        // this sucks. we need a way to specify a custom equals() for collection
-        // checking.
-                
-        Set<Entry> expectedItems = new HashSet<Entry>();
-        expectedItems.add(new Entry("some", new byte[]{0xc, 0xf}));
-        expectedItems.add(new Entry("else", new byte[]{0xc, 0xe}));
-        expectedItems.add(new Entry("third", new byte[]{0xc, 0xd}));
-        
-        for (Entry e: new ArrayList<Entry>(all)) {
-            ex
+
+        final List<Entry<byte[]>> entries = this.repo.loadAll();
+
+
+
+
+        final List<Entry<byte[]>> expectedEntries = Arrays.asList(new Entry<byte[]>("some", new byte[]{0xc, 0xf}),
+                new Entry<byte[]>("some", new byte[]{0xc, 0xe}),
+                new Entry<byte[]>("some", new byte[]{0xc, 0xd})
+                );
+
+
+        for (int i=0; i < entries.size(); i++) {
+            final Entry<byte[]> loaded = entries.get(i);
+            final Entry<byte[]> expected = expectedEntries.get(i);
+            Assert.assertEquals(expected.getId(), loaded.getId());
+            Assert.assertArrayEquals(expected.getContent(), loaded.getContent());
         }
         
-        Assert.assertEquals(expectedItems, Sets.newHashSet(all));
+
        
     }
     

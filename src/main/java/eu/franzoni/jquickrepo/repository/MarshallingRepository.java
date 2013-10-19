@@ -5,7 +5,7 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 import java.io.File;
 import java.nio.charset.Charset;
-import java.util.Collection;
+import java.util.List;
 
 public class MarshallingRepository<T> implements Repository<T> {
     
@@ -19,7 +19,7 @@ public class MarshallingRepository<T> implements Repository<T> {
     }
 
     @Override
-    public Collection<Entry<T>> loadAll() {
+    public List<Entry<T>> loadAll() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
