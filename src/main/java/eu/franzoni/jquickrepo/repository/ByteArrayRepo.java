@@ -19,7 +19,7 @@ import java.util.List;
 public class ByteArrayRepo implements Repository<byte[]> {
 
     @Override
-    public Collection<Entry<byte[]>> all() {
+    public Collection<Entry<byte[]>> loadAll() {
         File[] allFiles = this.persistenceDir.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {

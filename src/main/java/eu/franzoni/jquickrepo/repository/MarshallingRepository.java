@@ -19,7 +19,7 @@ public class MarshallingRepository<T> implements Repository<T> {
     }
 
     @Override
-    public Collection<Entry<T>> all() {
+    public Collection<Entry<T>> loadAll() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

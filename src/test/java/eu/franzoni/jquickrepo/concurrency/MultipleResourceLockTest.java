@@ -68,7 +68,7 @@ public class MultipleResourceLockTest {
 
         List<Callable<ReadWriteLock>> tasks = Collections.nCopies(THREAD_COUNT, callable);
         ExecutorService executorService = Executors.newFixedThreadPool(THREAD_COUNT);
-        List<Future<ReadWriteLock>> futures = executorService.invokeAll(tasks); // invokeAll() blocks until all tasks have run.
+        List<Future<ReadWriteLock>> futures = executorService.invokeAll(tasks); // invokeAll() blocks until loadAll tasks have run.
 
         for (Future<ReadWriteLock> future : futures) {
             ReadWriteLock lock = future.get(); // get() will throw an exception if an exception was thrown by the service.
@@ -110,7 +110,7 @@ public class MultipleResourceLockTest {
         // Execute tasks
         //
         ExecutorService executorService = Executors.newFixedThreadPool(THREAD_COUNT);
-        List<Future<ReadWriteLock>> futures = executorService.invokeAll(tasks); // invokeAll() blocks until all tasks have run.
+        List<Future<ReadWriteLock>> futures = executorService.invokeAll(tasks); // invokeAll() blocks until loadAll tasks have run.
         assertEquals(LOCKS_COUNT, futures.size());
 
         ReadWriteLock lastLock = locks.iterator().next();

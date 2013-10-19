@@ -4,7 +4,7 @@ import java.util.Collection;
 
 public interface Repository<T> {
     
-    Collection<Entry<T>> all();
+    Collection<Entry<T>> loadAll();
 
     void delete(String id);
 

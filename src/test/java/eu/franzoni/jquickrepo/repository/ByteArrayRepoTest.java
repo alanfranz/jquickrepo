@@ -197,7 +197,7 @@ public class ByteArrayRepoTest {
         this.repo.saveOrUpdate("else", new byte[]{0xc, 0xe});
         this.repo.saveOrUpdate("third", new byte[]{0xc, 0xd});
         
-        Collection<Entry<byte[]>> all = this.repo.all();
+        Collection<Entry<byte[]>> all = this.repo.loadAll();
         
         // this sucks. we need a way to specify a custom equals() for collection
         // checking.
