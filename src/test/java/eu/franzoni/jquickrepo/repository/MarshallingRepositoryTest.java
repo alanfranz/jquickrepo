@@ -85,7 +85,7 @@ public class MarshallingRepositoryTest {
         repo.save("1", "a");
         repo.save("2", "b");
         repo.save("3", "c");
-        final HashSet<Entry> expected = Sets.newHashSet(new Entry("1", "a"), new Entry("2", "b"), new Entry("3", "c"));
+        final HashSet<Entry<String>> expected = Sets.newHashSet(new Entry<String>("1", "a"), new Entry<String>("2", "b"), new Entry<String>("3", "c"));
         final Set<Entry<String>> loaded = new HashSet<Entry<String>>(repo.loadAll());
         assertEquals(expected, loaded);
 

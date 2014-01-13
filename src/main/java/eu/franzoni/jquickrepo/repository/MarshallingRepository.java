@@ -25,7 +25,7 @@ public class MarshallingRepository<T> implements Repository<T> {
         final Collection<Entry<byte[]>> marshaledEntries = this.diskRepo.loadAll();
         final List<Entry<T>> typedEntries = new ArrayList<Entry<T>>(marshaledEntries.size());
         for (Entry<byte[]> marshaledEntry: marshaledEntries) {
-            typedEntries.add(new Entry(marshaledEntry.getId(), marshaller.unmarshal(marshaledEntry.getContent())));
+            typedEntries.add(new Entry<T>(marshaledEntry.getId(), marshaller.unmarshal(marshaledEntry.getContent())));
         }
         return typedEntries;
     }
@@ -103,6 +103,7 @@ public class MarshallingRepository<T> implements Repository<T> {
 
         }
 
+        @SuppressWarnings("unchecked")
         public T unmarshal(byte[] bytes) {
             return (T) this.marshaller.fromXML(new String(bytes, this.charset));
 

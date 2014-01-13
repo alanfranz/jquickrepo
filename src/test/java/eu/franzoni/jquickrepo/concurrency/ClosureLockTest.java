@@ -64,6 +64,7 @@ public class ClosureLockTest extends TestCase {
 
     // TODO: improve and split this basic test.
     @Test
+    @SuppressWarnings("unchecked")
     public void testLockAndUnlockHappensAroundExecution() throws Exception {
         ReadWriteLock innerLock = new MockReadWriteLock();
         ScopedReadWriteLock lock = new ScopedReadWriteLock<Object>(innerLock);
