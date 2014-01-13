@@ -5,6 +5,7 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MarshallingRepository<T> implements Repository<T> {
@@ -20,7 +21,12 @@ public class MarshallingRepository<T> implements Repository<T> {
 
     @Override
     public List<Entry<T>> loadAll() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        final List<Entry<byte[]>> marshaledEntries = this.diskRepo.loadAll();
+        final List<Entry<T>> typedEntries = new ArrayList<Entry<T>>(marshaledEntries.size());
+        for (Entry<byte[]> marshaledEntry: marshaledEntries) {
+            typedEntries.add(new Entry(marshaledEntry.getId(), marshaller.unmarshal(marshaledEntry.getContent())));
+        }
+        return typedEntries;
     }
     
     
