@@ -5,8 +5,12 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-public class MarshallingRepository<T> {
+public class MarshallingRepository<T> implements Repository<T> {
+    
 
     private final ByteArrayRepo diskRepo;
     private final XStreamByteArrayMarshaller<T> marshaller;
@@ -16,30 +20,48 @@ public class MarshallingRepository<T> {
         this.marshaller = new XStreamByteArrayMarshaller<T>(Charset.forName("UTF-8"), new XStream(new StaxDriver()));
     }
 
+    @Override
+    public Collection<Entry<T>> loadAll() {
+        final Collection<Entry<byte[]>> marshaledEntries = this.diskRepo.loadAll();
+        final List<Entry<T>> typedEntries = new ArrayList<Entry<T>>(marshaledEntries.size());
+        for (Entry<byte[]> marshaledEntry: marshaledEntries) {
+            typedEntries.add(new Entry(marshaledEntry.getId(), marshaller.unmarshal(marshaledEntry.getContent())));
+        }
+        return typedEntries;
+    }
+    
+    
+
+    @Override
     public void save(String id, T obj) {
         this.diskRepo.save(id, marshaller.marshal(obj));
 
     }
 
+    @Override
     public void saveOrUpdate(String id, T obj) {
         this.diskRepo.saveOrUpdate(id, marshaller.marshal(obj));
 
     }
 
+    @Override
     public void update(String id, T obj) {
         this.diskRepo.update(id, marshaller.marshal(obj));
 
     }
 
+    @Override
     public void delete(String id) {
         this.diskRepo.delete(id);
 
     }
 
+    @Override
     public T load(String id) {
         return (T) this.marshaller.unmarshal(this.diskRepo.load(id));
     }
 
+    @Override
     public void modifyWhileLocking(final String id, final DoWhileLocking<T> whileLocking) throws UnknownResourceIdException {
         this.diskRepo.modifyWhileLocking(id, new DoWhileLocking<byte[]>() {
             @Override
@@ -53,6 +75,7 @@ public class MarshallingRepository<T> {
         });
     }
 
+    @Override
     public void modifyWhileLocking(final String id, final DoWhileLocking<T> whileLocking, final T missing) throws UnknownResourceIdException {
         this.diskRepo.modifyWhileLocking(id, new DoWhileLocking<byte[]>() {
             @Override

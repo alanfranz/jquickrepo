@@ -3,20 +3,12 @@ package eu.franzoni.jquickrepo.repository;
 
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
-import eu.franzoni.jquickrepo.repository.ByteArrayRepo.Item;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 public class ByteArrayRepoTest {
@@ -196,20 +188,22 @@ public class ByteArrayRepoTest {
     }
     
     @Test
-    public void searchAllEnumeratesAllSavedDAta() throws Exception {
+    public void canEnumerateAllSavedDAta() throws Exception {
         this.repo.saveOrUpdate("some", new byte[]{0xc, 0xf});
         this.repo.saveOrUpdate("else", new byte[]{0xc, 0xe});
         this.repo.saveOrUpdate("third", new byte[]{0xc, 0xd});
-        
-        Iterator<ByteArrayRepo.Item> all = this.repo.searchAll();
-        
-        Set<Item> expectedItems = new HashSet<Item>();
-        expectedItems.add(new Item("some", new byte[]{0xc, 0xf}));
-        expectedItems.add(new Item("else", new byte[]{0xc, 0xe}));
-        expectedItems.add(new Item("third", new byte[]{0xc, 0xd}));
-        
-        Assert.assertEquals(expectedItems, Sets.newHashSet(all));
-       
+
+        final Collection<Entry<byte[]>> loadedEntries = this.repo.loadAll();
+
+        final Map<String, byte[]> expectedEntries = new HashMap<String, byte[]>();
+        expectedEntries.put("some", new byte[] {0xc, 0xf});
+        expectedEntries.put("else", new byte[] {0xc, 0xe});
+        expectedEntries.put("third", new byte[] {0xc, 0xd});
+
+        for (Entry<byte[]> entry: loadedEntries) {
+            Assert.assertArrayEquals(expectedEntries.get(entry.getId()), entry.getContent());
+        }
+
     }
     
     

@@ -1,10 +1,16 @@
 package eu.franzoni.jquickrepo.repository;
 
-import org.junit.*;
+import com.google.common.collect.Sets;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MarshallingRepositoryTest {
 
@@ -72,5 +78,16 @@ public class MarshallingRepositoryTest {
     public void loadFailsIfElementDoesNotExist() {
         MarshallingRepository<List<String>> repo = new MarshallingRepository<List<String>>(tempFolder.getRoot());
         repo.load("something");
+    }
+
+    public void loadAllLoadsAllEntriesInRepo() {
+        MarshallingRepository<String> repo = new MarshallingRepository<String>(tempFolder.getRoot());
+        repo.save("1", "a");
+        repo.save("2", "b");
+        repo.save("3", "c");
+        final HashSet<Entry> expected = Sets.newHashSet(new Entry("1", "a"), new Entry("2", "b"), new Entry("3", "c"));
+        final Set<Entry<String>> loaded = new HashSet<Entry<String>>(repo.loadAll());
+        assertEquals(expected, loaded);
+
     }
 }
