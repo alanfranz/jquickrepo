@@ -193,26 +193,17 @@ public class ByteArrayRepoTest {
         this.repo.saveOrUpdate("else", new byte[]{0xc, 0xe});
         this.repo.saveOrUpdate("third", new byte[]{0xc, 0xd});
 
-        final List<Entry<byte[]>> entries = this.repo.loadAll();
+        final Collection<Entry<byte[]>> loadedEntries = this.repo.loadAll();
 
+        final Map<String, byte[]> expectedEntries = new HashMap<String, byte[]>();
+        expectedEntries.put("some", new byte[] {0xc, 0xf});
+        expectedEntries.put("else", new byte[] {0xc, 0xe});
+        expectedEntries.put("third", new byte[] {0xc, 0xd});
 
-
-
-        final List<Entry<byte[]>> expectedEntries = Arrays.asList(new Entry<byte[]>("some", new byte[]{0xc, 0xf}),
-                new Entry<byte[]>("some", new byte[]{0xc, 0xe}),
-                new Entry<byte[]>("some", new byte[]{0xc, 0xd})
-                );
-
-
-        for (int i=0; i < entries.size(); i++) {
-            final Entry<byte[]> loaded = entries.get(i);
-            final Entry<byte[]> expected = expectedEntries.get(i);
-            Assert.assertEquals(expected.getId(), loaded.getId());
-            Assert.assertArrayEquals(expected.getContent(), loaded.getContent());
+        for (Entry<byte[]> entry: loadedEntries) {
+            Assert.assertArrayEquals(expectedEntries.get(entry.getId()), entry.getContent());
         }
-        
 
-       
     }
     
     

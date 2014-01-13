@@ -1,10 +1,10 @@
 package eu.franzoni.jquickrepo.repository;
 
-import java.util.List;
+import java.util.Collection;
 
 public interface Repository<T> {
     
-    List<Entry<T>> loadAll();
+    Collection<Entry<T>> loadAll();
 
     void delete(String id);
 

@@ -6,6 +6,7 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class MarshallingRepository<T> implements Repository<T> {
@@ -20,8 +21,8 @@ public class MarshallingRepository<T> implements Repository<T> {
     }
 
     @Override
-    public List<Entry<T>> loadAll() {
-        final List<Entry<byte[]>> marshaledEntries = this.diskRepo.loadAll();
+    public Collection<Entry<T>> loadAll() {
+        final Collection<Entry<byte[]>> marshaledEntries = this.diskRepo.loadAll();
         final List<Entry<T>> typedEntries = new ArrayList<Entry<T>>(marshaledEntries.size());
         for (Entry<byte[]> marshaledEntry: marshaledEntries) {
             typedEntries.add(new Entry(marshaledEntry.getId(), marshaller.unmarshal(marshaledEntry.getContent())));
